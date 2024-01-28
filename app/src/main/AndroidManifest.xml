@@ -2,13 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="true" />
-
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -20,6 +13,9 @@
         android:theme="@style/Theme.Broadcast"
         tools:targetApi="31">
         <activity
+            android:name=".ui.MainActivity2"
+            android:exported="false" />
+        <activity
             android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
@@ -28,19 +24,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.TimerDialogActivity"
+            android:exported="false" android:excludeFromRecents="true" android:theme="@style/AppDialogTheme" />
+
         <service
-            android:name=".service.AccessibiltyServiceClass"
+            android:name=".MyAccessibilityService"
             android:exported="true"
+            android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
             <meta-data
-                android:name="android.accessibilityservice"
+                android:name="android.accessibility-service"
                 android:resource="@xml/accessibility_service_config" />
         </service>
-
     </application>
 
 </manifest>
