@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -30,10 +31,12 @@ private lateinit var viewModel: MainViewMode
         val intent = Intent(this, TimerDialogActivity::class.java)
 
         binding.serviceBtn.setOnClickListener {
-//          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-//        MyAccessibilityService.startService()
+          startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        MyAccessibilityService.startService()
 //            timerActivityResultLauncher.launch(intent)
-        startActivity(intent)
+//        startActivity(intent)
+
+//            viewModel.startIdleTimer()
         }
         if(MyAccessibilityService.isServiceConnected){
             binding.setGranted.text = "Granted"
@@ -47,28 +50,48 @@ private lateinit var viewModel: MainViewMode
             viewModel.stopIdleTimer()
 
         }
+        viewModel.idletimer.observe(this){
+            binding.timer.text ="timer $it"
+            if(it!=null && it>8){
+                timerActivityResultLauncher.launch(intent)
+                stopListenerNdTimer()
+            }
+        }
+        viewModel.totalIdleTime.observe(this){
+            binding.idleTime.text = "Idle time $it"
+        }
+
         MyAccessibilityService.clickCount.observe(this){
             if(it>0){
-                if(viewModel.isIdleRunning()){
-                    viewModel.stopIdleTimer()
-                }
-                viewModel.startIdleTimer()
+                resetListenerIdleTImer()
             }
             binding.count.text="count is $it"
         }
-        viewModel.idletimer.observe(this){
-            binding.timer.text ="timer $it"
-        }
+//        viewModel.dialogTimer.observe(this){
+//            binding.timer.text ="timer $it"
+//        }
         setContentView(binding.root)
     }
     private val timerActivityResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data
-                val timerDuration = data?.getIntExtra("timerDuration", 0) ?: 0
+                val timerDuration = data?.getIntExtra("timerDuration", 8) ?: 0
                 // Start timer with duration
+                if(timerDuration>0)viewModel.totalIdleTime.postValue(viewModel.totalIdleTime.value?.plus(timerDuration))
+
                 // Example: startTimer(timerDuration)
             }
+            MyAccessibilityService.startService()
         }
-
+        private fun resetListenerIdleTImer(){
+            if(viewModel.isIdleRunning()){
+                viewModel.stopIdleTimer()
+            }
+            viewModel.startIdleTimer()
+        }
+    private fun stopListenerNdTimer(){
+        MyAccessibilityService.stopService()
+        viewModel.stopIdleTimer()
+    }
 }

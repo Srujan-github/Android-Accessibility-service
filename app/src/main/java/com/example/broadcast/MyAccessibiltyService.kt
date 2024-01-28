@@ -33,8 +33,8 @@ class MyAccessibilityService : AccessibilityService() {
         Timber.tag(TAG).d("checkjj Connected")
         this.serviceInfo = info
         isServiceConnected=true
-
     }
+
 companion object{
     private val _clickCount = MutableLiveData(0)
     val clickCount:LiveData<Int> get()= _clickCount
